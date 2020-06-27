@@ -224,10 +224,12 @@ public class NotificationService {
 
     public boolean notify(final Message message) {
         final Conversation conversation = (Conversation) message.getConversation();
-        return message.getStatus() == Message.STATUS_RECEIVED
-                && !conversation.isMuted()
-                && (conversation.alwaysNotify() || wasHighlightedOrPrivate(message))
-                && (!conversation.isWithStranger() || notificationsFromStrangers());
+
+        boolean ret = (message.getStatus() == Message.STATUS_RECEIVED);
+//                && !conversation.isMuted()
+//                && (conversation.alwaysNotify() || wasHighlightedOrPrivate(message))
+//                && (!conversation.isWithStranger() || notificationsFromStrangers()));
+        return ret;
     }
 
     public boolean notificationsFromStrangers() {
@@ -442,18 +444,20 @@ public class NotificationService {
             return;
         }
         final boolean isScreenOn = mXmppConnectionService.isInteractive();
-        if (this.mIsInForeground && isScreenOn && this.mOpenConversation == message.getConversation()) {
-            Log.d(Config.LOGTAG, message.getConversation().getAccount().getJid().asBareJid() + ": suppressing notification because conversation is open");
-            return;
-        }
+//        if (this.mIsInForeground && isScreenOn && this.mOpenConversation == message.getConversation()) {
+//            Log.d(Config.LOGTAG, message.getConversation().getAccount().getJid().asBareJid() + ": suppressing notification because conversation is open");
+//            return;
+//        }
         synchronized (notifications) {
             pushToStack(message);
             final Conversational conversation = message.getConversation();
             final Account account = conversation.getAccount();
-            final boolean doNotify = (!(this.mIsInForeground && this.mOpenConversation == null) || !isScreenOn)
-                    && !account.inGracePeriod()
-                    && !this.inMiniGracePeriod(account);
-            updateNotification(doNotify, Collections.singletonList(conversation.getUuid()));
+            final boolean doNotify = (!(this.mIsInForeground && this.mOpenConversation == null) || !isScreenOn);
+//                    && !account.inGracePeriod()
+//                    && !this.inMiniGracePeriod(account);
+            Log.d("notify", "pushNow: doNotify:" + doNotify + ",isinForeground:" + this.mIsInForeground + ",openconversirton:" + this.mOpenConversation + ",isScreeOn:" + isScreenOn);
+            //updateNotification(doNotify, Collections.singletonList(conversation.getUuid()));
+            updateNotification(true, Collections.singletonList(conversation.getUuid()));
         }
     }
 
@@ -1041,7 +1045,8 @@ public class NotificationService {
     private boolean inMiniGracePeriod(final Account account) {
         final int miniGrace = account.getStatus() == Account.State.ONLINE ? Config.MINI_GRACE_PERIOD
                 : Config.MINI_GRACE_PERIOD * 2;
-        return SystemClock.elapsedRealtime() < (this.mLastNotification + miniGrace);
+        //return SystemClock.elapsedRealtime() < (this.mLastNotification + miniGrace);
+        return false;
     }
 
     Notification createForegroundNotification() {

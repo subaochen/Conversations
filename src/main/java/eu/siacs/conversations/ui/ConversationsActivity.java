@@ -376,6 +376,7 @@ public class ConversationsActivity extends XmppActivity implements OnConversatio
         }
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_conversations, menu);
